@@ -141,3 +141,43 @@ FROM menu
 JOIN sales ON sales.product_id = menu.product_id
 JOIN members ON members.customer_id = sales.customer_id
 GROUP BY members.customer_id;
+
+-- Bonus Question 1. JOIN all things
+-- For this query, I'm supposed to present customer_id, order_date, product_name, price of the product
+-- and a column to show if the purchase was made when the customer was a member or not
+
+SELECT 
+	sales.customer_id,
+	sales.order_date,
+	menu.product_name,
+	menu.price,
+	CASE WHEN members.join_date < sales.order_date THEN 'Y'
+		ELSE 'N' END AS member
+FROM sales
+LEFT JOIN members ON sales.customer_id = members.customer_id
+JOIN menu ON sales.product_id = menu.product_id
+ORDER BY 1;
+
+-- Bonus Question 2. RANK all things
+-- -- In this table, present customer_id, order_date, product_name, price of the product,
+-- a column to show if the purchase was made when the customer was a member or not, and rank by
+-- order_date for purchases for each customer when they joined the loyalty program
+
+WITH t1 AS (
+	SELECT 
+		sales.customer_id,
+		sales.order_date,
+		menu.product_name,
+		menu.price,
+		CASE WHEN members.join_date < sales.order_date THEN 'Y'
+			ELSE 'N' END AS member
+	FROM sales
+	LEFT JOIN members ON sales.customer_id = members.customer_id
+	JOIN menu ON sales.product_id = menu.product_id
+	ORDER BY 1)
+
+SELECT customer_id, order_date, product_name, price, member,
+		CASE WHEN member = 'Y' THEN RANK() OVER (PARTITION BY customer_id, member ORDER BY order_date)
+			ELSE NULL END AS ranking
+FROM t1
+ORDER BY 1;
