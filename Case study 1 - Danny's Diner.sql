@@ -21,7 +21,8 @@ WHERE (s.customer_id, s.order_date) IN (
 	FROM sales
 	GROUP BY 1
 )
-GROUP BY 1,2;
+GROUP BY 1,2
+ORDER BY 1;
 
 -- 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
 SELECT m.product_name, COUNT(s.product_id) AS number_of_purchases
